@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kube-dns-sync
+  namespace: default
+  labels:
+    app: kube-dns-sync
+spec:
+  selector:
+    matchLabels:
+      app: kube-dns-sync
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: kube-dns-sync
+    spec:
+      securityContext:
+        runAsNonRoot: true
+      containers:
+        - name: kube-dns-sync
+          image: xmapst/kube-dns-sync:latest
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+      serviceAccountName: kube-dns-sync
+      terminationGracePeriodSeconds: 10
