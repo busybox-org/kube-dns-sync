@@ -7,6 +7,7 @@ import (
 )
 
 type Config struct {
+	Provider   string
 	Ak         string
 	SK         string
 	Type       string

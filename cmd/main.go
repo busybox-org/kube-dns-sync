@@ -37,8 +37,6 @@ func init() {
 	cmd.PersistentFlags().StringVarP(&engine.DefaultDnsType, "default.dns_type", "", "", "Default dns provider provider")
 	cmd.PersistentFlags().StringVarP(&engine.DefaultAK, "default.ak", "", "", "AK authentication of the default dns provider provider")
 	cmd.PersistentFlags().StringVarP(&engine.DefaultSK, "default.sk", "", "", "SK authentication of the default dns provider provider")
-	cmd.PersistentFlags().BoolVarP(&engine.DefaultEnableIPV4, "default.enable_ipv4", "4", false, "Enable ipv4 parsing by default")
-	cmd.PersistentFlags().BoolVarP(&engine.DefaultEnableIPV6, "default.enable_ipv6", "6", false, "Enable ipv6 parsing by default")
 	cmd.PersistentFlags().StringVarP(&engine.HttpProxy, "http.proxy", "", "", "Use proxy to add dns resolution")
 	cmd.PersistentFlags().StringVarP(&engine.DNSServer, "dns", "", "", "dns server")
 }

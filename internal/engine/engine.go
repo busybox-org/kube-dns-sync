@@ -44,15 +44,13 @@ const (
 )
 
 var (
-	Debug             bool
-	KubeConf          string
-	DefaultDnsType    string
-	DefaultAK         string
-	DefaultSK         string
-	DefaultEnableIPV4 bool
-	DefaultEnableIPV6 bool
-	HttpProxy         string
-	DNSServer         string
+	Debug          bool
+	KubeConf       string
+	DefaultDnsType string
+	DefaultAK      string
+	DefaultSK      string
+	HttpProxy      string
+	DNSServer      string
 )
 
 type Program struct {
@@ -210,13 +208,13 @@ func (p *Program) dispatch() {
 }
 
 func (p *Program) consumer(item *networkingv1.Ingress) {
-	proxy := item.Annotations[annotationProxy]
-	if proxy == "" {
+	proxy, ok := item.Annotations[annotationProxy]
+	if !ok {
 		proxy = HttpProxy
 	}
 
-	_dns := item.Annotations[annotationDNS]
-	if _dns == "" {
+	_dns, ok := item.Annotations[annotationDNS]
+	if !ok {
 		_dns = DNSServer
 	}
 	// get ingress controller svc
@@ -396,46 +394,62 @@ func (p *Program) getIpv4AddrFromUrl(proxy, dns string) (result string) {
 }
 
 func (p *Program) checkResolution(t string, addr string, item *networkingv1.Ingress) error {
-	args, err := url.ParseQuery(item.Annotations[annotationArgs])
-	if err != nil {
-		klog.Errorln(err)
-	}
 	for _, rule := range item.Spec.Rules {
-		key := fmt.Sprintf("%s/%s", t, rule.Host)
-		val, ok := p.cache.Get(key)
-		if ok && val.(string) == addr {
-			klog.Infof("Your IP %s has not changed, domain name %s", addr, rule.Host)
-			// not thing to do
-			return nil
-		}
-		config := dns.Config{
-			Type: t,
-			Ak:   item.Annotations[annotationAK],
-			SK:   item.Annotations[annotationSK],
-			Host: rule.Host,
-			Addr: addr,
-			Args: args,
-		}
-		provider, err := dns.New(item.Annotations[annotationType])
+		args, err := url.ParseQuery(item.Annotations[annotationArgs])
 		if err != nil {
-			klog.Errorln(err)
-			continue
+			klog.Warningln(err)
 		}
-		if err := provider.Init(&config); err != nil {
-			klog.Errorln(err)
-			continue
-		}
-		if err := provider.AddUpdateDomainRecords(); err != nil {
-			klog.Errorln(err)
-			continue
-		}
+		ak, ok := item.Annotations[annotationAK]
 		if !ok {
-			if err := p.cache.Add(key, addr, gocache.NoExpiration); err != nil {
-				klog.Errorln(err)
-				return err
-			}
+			ak = DefaultAK
 		}
-		p.cache.Set(key, addr, gocache.NoExpiration)
+		sk, ok := item.Annotations[annotationSK]
+		if !ok {
+			sk = DefaultSK
+		}
+		providerType, ok := item.Annotations[annotationType]
+		if !ok {
+			providerType = DefaultDnsType
+		}
+		p.resolution(&dns.Config{
+			Provider: providerType,
+			Ak:       ak,
+			SK:       sk,
+			Type:     t,
+			Host:     rule.Host,
+			Addr:     addr,
+			Args:     args,
+		})
 	}
 	return nil
+}
+
+func (p *Program) resolution(conf *dns.Config) {
+	key := fmt.Sprintf("%s/%s", conf.Type, conf.Host)
+	val, ok := p.cache.Get(key)
+	if ok && val.(string) == conf.Addr {
+		klog.Infof("Your IP %s has not changed, domain name %s", conf.Addr, conf.Host)
+		// not thing to do
+		return
+	}
+	provider, err := dns.New(conf.Provider)
+	if err != nil {
+		klog.Errorln(err)
+		return
+	}
+	if err := provider.Init(conf); err != nil {
+		klog.Errorln(err)
+		return
+	}
+	if err := provider.AddUpdateDomainRecords(); err != nil {
+		klog.Errorln(err)
+		return
+	}
+	if !ok {
+		if err := p.cache.Add(key, conf.Addr, gocache.NoExpiration); err != nil {
+			klog.Errorln(err)
+			return
+		}
+	}
+	p.cache.Set(key, conf.Addr, gocache.NoExpiration)
 }
