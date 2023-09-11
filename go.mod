@@ -5,7 +5,7 @@ go 1.20
 require (
 	github.com/kardianos/service v1.2.2
 	github.com/patrickmn/go-cache v2.1.0+incompatible
-	github.com/smallnest/chanx v1.1.0
+	github.com/smallnest/chanx v1.2.0
 	github.com/spf13/cobra v1.7.0
 	k8s.io/api v0.28.1
 	k8s.io/apimachinery v0.28.1
