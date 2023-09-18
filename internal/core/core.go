@@ -38,7 +38,7 @@ const (
 	annotationAK     = "kubernetes.io/kube-dns-sync.access_key"
 	annotationSK     = "kubernetes.io/kube-dns-sync.access_secret"
 	annotationArgs   = "kubernetes.io/kube-dns-sync.args"
-	annotationProxy  = "kubernetes.io/kube-dns-sync.http_proxy"
+	annotationProxy  = "kubernetes.io/kube-dns-sync.proxy"
 	annotationIPV4   = "kubernetes.io/kube-dns-sync.enable_ipv4"
 	annotationIPV6   = "kubernetes.io/kube-dns-sync.enable_ipv6"
 	annotationDNS    = "kubernetes.io/kube-dns-sync.dns_server"

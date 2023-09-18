@@ -38,7 +38,7 @@ func init() {
 	cmd.PersistentFlags().StringVarP(&core.DefaultDnsType, "default.dns_type", "", "", "Default dns provider provider")
 	cmd.PersistentFlags().StringVarP(&core.DefaultAK, "default.ak", "", "", "AK authentication of the default dns provider provider")
 	cmd.PersistentFlags().StringVarP(&core.DefaultSK, "default.sk", "", "", "SK authentication of the default dns provider provider")
-	cmd.PersistentFlags().StringVarP(&core.HttpProxy, "http.proxy", "", "", "Use proxy to add dns resolution")
+	cmd.PersistentFlags().StringVarP(&core.HttpProxy, "proxy", "", "", "Use proxy to add dns resolution")
 	cmd.PersistentFlags().StringVarP(&core.DNSServer, "dns", "", "", "dns server")
 }
 
