@@ -6,6 +6,8 @@ import (
 	"github.com/kardianos/service"
 	"github.com/spf13/cobra"
 	"k8s.io/klog/v2"
+
+	"github.com/xmapst/kube-dns-sync/internal/core"
 )
 
 var (
