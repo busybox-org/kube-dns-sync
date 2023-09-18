@@ -1,4 +1,4 @@
-package engine
+package core
 
 import (
 	"context"
@@ -15,8 +15,6 @@ import (
 	"github.com/kardianos/service"
 	gocache "github.com/patrickmn/go-cache"
 	"github.com/smallnest/chanx"
-	"github.com/xmapst/kube-dns-sync/internal/dns"
-	"github.com/xmapst/kube-dns-sync/internal/utils"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/api/core/v1"
 	networkingv1 "k8s.io/api/networking/v1"
@@ -29,6 +27,9 @@ import (
 	kubecache "k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/klog/v2"
+
+	"github.com/xmapst/kube-dns-sync/internal/dns"
+	"github.com/xmapst/kube-dns-sync/internal/utils"
 )
 
 const (
@@ -68,7 +69,7 @@ type Program struct {
 func (p *Program) Start(_ service.Service) error {
 	klog.Infoln("application is started")
 	p.ctx, p.cancel = context.WithCancel(context.Background())
-	p.recvCh = chanx.NewUnboundedChan[*networkingv1.Ingress](40960)
+	p.recvCh = chanx.NewUnboundedChan[*networkingv1.Ingress](p.ctx, 40960)
 
 	// new cache in memory
 	p.cache = gocache.New(5*time.Minute, 10*time.Minute)

@@ -11,6 +11,7 @@ import (
 	"os"
 	"time"
 
+	"golang.org/x/net/proxy"
 	"k8s.io/klog/v2"
 )
 
@@ -109,14 +110,21 @@ func CreateNoProxyHTTPClient(network string, dnsServer string) *http.Client {
 }
 
 // CreateProxyHTTPClient Create Proxy HTTP Client
-func CreateProxyHTTPClient(network string, dnsServer, proxy string) *http.Client {
+func CreateProxyHTTPClient(network string, dnsServer, proxyAddr string) *http.Client {
 	dialer.Resolver = CustomDNSResolver(dnsServer)
 	if network == "tcp6" {
-		var proxyTcp6Transport = &http.Transport{
+		var transport = &http.Transport{
 			// DisableKeepAlives
 			DisableKeepAlives: true,
 			// tcp6
 			DialContext: func(ctx context.Context, network, address string) (net.Conn, error) {
+				proxyUrl, err := url.Parse(proxyAddr)
+				if err == nil {
+					xdetail, err := proxy.FromURL(proxyUrl, proxy.Direct)
+					if err == nil {
+						return xdetail.Dial("tcp6", address)
+					}
+				}
 				return dialer.DialContext(ctx, "tcp6", address)
 			},
 			// from http.DefaultTransport
@@ -126,20 +134,11 @@ func CreateProxyHTTPClient(network string, dnsServer, proxy string) *http.Client
 			TLSHandshakeTimeout:   10 * time.Second,
 			ExpectContinueTimeout: 1 * time.Second,
 		}
-		if proxy != "" {
-			proxyUrl, err := url.Parse(proxy)
-			if err != nil {
-				klog.Errorln(err)
-			}
-			if proxyUrl != nil {
-				proxyTcp6Transport.Proxy = http.ProxyURL(proxyUrl)
-			}
-		}
 		// SkipVerfiry
-		proxyTcp6Transport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+		transport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 		return &http.Client{
 			Timeout:   30 * time.Second,
-			Transport: proxyTcp6Transport,
+			Transport: transport,
 		}
 	}
 	var proxyTcp4Transport = &http.Transport{
@@ -148,6 +147,13 @@ func CreateProxyHTTPClient(network string, dnsServer, proxy string) *http.Client
 		DisableKeepAlives: true,
 		// tcp4
 		DialContext: func(ctx context.Context, network, address string) (net.Conn, error) {
+			proxyUrl, err := url.Parse(proxyAddr)
+			if err == nil {
+				xdetail, err := proxy.FromURL(proxyUrl, proxy.Direct)
+				if err == nil {
+					return xdetail.Dial("tcp4", address)
+				}
+			}
 			return dialer.DialContext(ctx, "tcp4", address)
 		},
 		// from http.DefaultTransport
@@ -156,15 +162,6 @@ func CreateProxyHTTPClient(network string, dnsServer, proxy string) *http.Client
 		IdleConnTimeout:       90 * time.Second,
 		TLSHandshakeTimeout:   10 * time.Second,
 		ExpectContinueTimeout: 1 * time.Second,
-	}
-	if proxy != "" {
-		proxyUrl, err := url.Parse(proxy)
-		if err != nil {
-			klog.Errorln(err)
-		}
-		if proxyUrl != nil {
-			proxyTcp4Transport.Proxy = http.ProxyURL(proxyUrl)
-		}
 	}
 	// SkipVerfiry
 	proxyTcp4Transport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}

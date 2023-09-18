@@ -9,8 +9,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/xmapst/kube-dns-sync/internal/utils"
 	"k8s.io/klog/v2"
+
+	"github.com/xmapst/kube-dns-sync/internal/utils"
 )
 
 const (
