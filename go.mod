@@ -6,7 +6,7 @@ require (
 	github.com/kardianos/service v1.2.2
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/smallnest/chanx v1.2.0
-	github.com/spf13/cobra v1.8.0
+	github.com/spf13/cobra v1.8.1
 	golang.org/x/net v0.26.0
 	k8s.io/api v0.30.2
 	k8s.io/apimachinery v0.30.2
