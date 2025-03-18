@@ -1,6 +1,7 @@
 module github.com/xmapst/kube-dns-sync
 
 go 1.20
+toolchain go1.24.1
 
 require (
 	github.com/kardianos/service v1.2.2
@@ -8,7 +9,7 @@ require (
 	github.com/smallnest/chanx v1.2.0
 	github.com/spf13/cobra v1.9.1
 	golang.org/x/net v0.37.0
-	k8s.io/api v0.32.2
+	k8s.io/api v0.32.3
 	k8s.io/apimachinery v0.32.3
 	k8s.io/client-go v0.32.2
 	k8s.io/klog/v2 v2.130.1
