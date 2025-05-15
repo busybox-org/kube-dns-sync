@@ -10,7 +10,7 @@ require (
 	github.com/smallnest/chanx v1.2.0
 	github.com/spf13/cobra v1.9.1
 	golang.org/x/net v0.38.0
-	k8s.io/api v0.32.3
+	k8s.io/api v0.33.0
 	k8s.io/apimachinery v0.33.0
 	k8s.io/client-go v0.32.3
 	k8s.io/klog/v2 v2.130.1
